@@ -451,6 +451,25 @@ async def send_admin_notification(text: str, reply_markup: Optional[InlineKeyboa
             logger.exception(f"Failed sending admin notification to {admin_id}")
 
 # -------------------- Startup --------------------
+# if __name__ == "__main__":
+#     logger.info("Bot starting...")
+#     executor.start_polling(dp, skip_updates=True)
+
+from aiohttp import web
+import asyncio
+
+async def on_startup(app):
+    asyncio.create_task(dp.start_polling())
+
+async def handle_root(request):
+    return web.Response(text="Confession bot running.")
+
 if __name__ == "__main__":
-    logger.info("Bot starting...")
-    executor.start_polling(dp, skip_updates=True)
+    app = web.Application()
+    app.on_startup.append(on_startup)
+
+    app.router.add_get("/", handle_root)
+
+    port = int(os.getenv("PORT", 8080))
+    web.run_app(app, port=port)
+
